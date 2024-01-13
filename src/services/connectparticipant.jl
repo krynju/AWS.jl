@@ -21,24 +21,22 @@ Signature Version 4 authentication.
 - `x-_amz-_bearer`: The authentication token associated with the participant's connection.
 
 """
-function complete_attachment_upload(
+complete_attachment_upload(
     AttachmentIds,
     ClientToken,
     X_Amz_Bearer;
     aws_config::AbstractAWSConfig=global_aws_config(),
+) = connectparticipant(
+    "POST",
+    "/participant/complete-attachment-upload",
+    Dict{String,Any}(
+        "AttachmentIds" => AttachmentIds,
+        "ClientToken" => ClientToken,
+        "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
+    );
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return connectparticipant(
-        "POST",
-        "/participant/complete-attachment-upload",
-        Dict{String,Any}(
-            "AttachmentIds" => AttachmentIds,
-            "ClientToken" => ClientToken,
-            "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
-        );
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function complete_attachment_upload(
     AttachmentIds,
     ClientToken,
@@ -95,20 +93,18 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"ConnectParticipant"`: Amazon Connect Participant is used to mark the participant as
   connected for customer participant in message streaming, as well as for agent or manager
   participant in non-streaming chats.
-- `"Type"`: Type of connection information required. This can be omitted if
-  ConnectParticipant is true.
+- `"Type"`: Type of connection information required. If you need CONNECTION_CREDENTIALS
+  along with marking participant as connected, pass CONNECTION_CREDENTIALS in Type.
 """
-function create_participant_connection(
+create_participant_connection(
     X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()
+) = connectparticipant(
+    "POST",
+    "/participant/connection",
+    Dict{String,Any}("headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer));
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return connectparticipant(
-        "POST",
-        "/participant/connection",
-        Dict{String,Any}("headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer));
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function create_participant_connection(
     X_Amz_Bearer,
     params::AbstractDict{String};
@@ -117,6 +113,49 @@ function create_participant_connection(
     return connectparticipant(
         "POST",
         "/participant/connection",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer)
+                ),
+                params,
+            ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    describe_view(view_token, x-_amz-_bearer)
+    describe_view(view_token, x-_amz-_bearer, params::Dict{String,<:Any})
+
+Retrieves the view for the specified view token.
+
+# Arguments
+- `view_token`: An encrypted token originating from the interactive message of a ShowView
+  block operation. Represents the desired view.
+- `x-_amz-_bearer`: The connection token.
+
+"""
+describe_view(ViewToken, X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()) =
+    connectparticipant(
+        "GET",
+        "/participant/views/$(ViewToken)",
+        Dict{String,Any}("headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer));
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+function describe_view(
+    ViewToken,
+    X_Amz_Bearer,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connectparticipant(
+        "GET",
+        "/participant/views/$(ViewToken)",
         Dict{String,Any}(
             mergewith(
                 _merge,
@@ -148,10 +187,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   idempotency of the request. If not provided, the Amazon Web Services SDK populates this
   field. For more information about idempotency, see Making retries safe with idempotent APIs.
 """
-function disconnect_participant(
-    X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return connectparticipant(
+disconnect_participant(X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()) =
+    connectparticipant(
         "POST",
         "/participant/disconnect",
         Dict{String,Any}(
@@ -161,7 +198,6 @@ function disconnect_participant(
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function disconnect_participant(
     X_Amz_Bearer,
     params::AbstractDict{String};
@@ -199,20 +235,18 @@ Version 4 authentication.
 - `x-_amz-_bearer`: The authentication token associated with the participant's connection.
 
 """
-function get_attachment(
+get_attachment(
     AttachmentId, X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()
+) = connectparticipant(
+    "POST",
+    "/participant/attachment",
+    Dict{String,Any}(
+        "AttachmentId" => AttachmentId,
+        "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
+    );
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return connectparticipant(
-        "POST",
-        "/participant/attachment",
-        Dict{String,Any}(
-            "AttachmentId" => AttachmentId,
-            "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
-        );
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function get_attachment(
     AttachmentId,
     X_Amz_Bearer,
@@ -262,15 +296,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"SortOrder"`: The sort order for the records. Default: DESCENDING.
 - `"StartPosition"`: A filtering option for where to start.
 """
-function get_transcript(X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config())
-    return connectparticipant(
+get_transcript(X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()) =
+    connectparticipant(
         "POST",
         "/participant/transcript",
         Dict{String,Any}("headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function get_transcript(
     X_Amz_Bearer,
     params::AbstractDict{String};
@@ -318,10 +351,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   related to message receipts, this is supported in the form of a JSON string. Sample
   Content: \"{\"messageId\":\"11111111-aaaa-bbbb-cccc-EXAMPLE01234\"}\"
 """
-function send_event(
-    ContentType, X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return connectparticipant(
+send_event(ContentType, X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()) =
+    connectparticipant(
         "POST",
         "/participant/event",
         Dict{String,Any}(
@@ -332,7 +363,6 @@ function send_event(
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function send_event(
     ContentType,
     X_Amz_Bearer,
@@ -382,22 +412,20 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   idempotency of the request. If not provided, the Amazon Web Services SDK populates this
   field. For more information about idempotency, see Making retries safe with idempotent APIs.
 """
-function send_message(
+send_message(
     Content, ContentType, X_Amz_Bearer; aws_config::AbstractAWSConfig=global_aws_config()
+) = connectparticipant(
+    "POST",
+    "/participant/message",
+    Dict{String,Any}(
+        "Content" => Content,
+        "ContentType" => ContentType,
+        "ClientToken" => string(uuid4()),
+        "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
+    );
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return connectparticipant(
-        "POST",
-        "/participant/message",
-        Dict{String,Any}(
-            "Content" => Content,
-            "ContentType" => ContentType,
-            "ClientToken" => string(uuid4()),
-            "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
-        );
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function send_message(
     Content,
     ContentType,
@@ -444,28 +472,26 @@ Connect Participant Service APIs do not use Signature Version 4 authentication.
 - `x-_amz-_bearer`: The authentication token associated with the participant's connection.
 
 """
-function start_attachment_upload(
+start_attachment_upload(
     AttachmentName,
     AttachmentSizeInBytes,
     ClientToken,
     ContentType,
     X_Amz_Bearer;
     aws_config::AbstractAWSConfig=global_aws_config(),
+) = connectparticipant(
+    "POST",
+    "/participant/start-attachment-upload",
+    Dict{String,Any}(
+        "AttachmentName" => AttachmentName,
+        "AttachmentSizeInBytes" => AttachmentSizeInBytes,
+        "ClientToken" => ClientToken,
+        "ContentType" => ContentType,
+        "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
+    );
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return connectparticipant(
-        "POST",
-        "/participant/start-attachment-upload",
-        Dict{String,Any}(
-            "AttachmentName" => AttachmentName,
-            "AttachmentSizeInBytes" => AttachmentSizeInBytes,
-            "ClientToken" => ClientToken,
-            "ContentType" => ContentType,
-            "headers" => Dict{String,Any}("X-Amz-Bearer" => X_Amz_Bearer),
-        );
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function start_attachment_upload(
     AttachmentName,
     AttachmentSizeInBytes,

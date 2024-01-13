@@ -20,15 +20,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"clientToken"`:
 - `"state"`: The state of the destination. Default used if not specified.
 """
-function create_destination(name, site; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
+create_destination(name, site; aws_config::AbstractAWSConfig=global_aws_config()) =
+    iot_roborunner(
         "POST",
         "/createDestination",
         Dict{String,Any}("name" => name, "site" => site, "clientToken" => string(uuid4()));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function create_destination(
     name,
     site,
@@ -67,8 +66,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"clientToken"`:
 - `"description"`:
 """
-function create_site(countryCode, name; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
+create_site(countryCode, name; aws_config::AbstractAWSConfig=global_aws_config()) =
+    iot_roborunner(
         "POST",
         "/createSite",
         Dict{String,Any}(
@@ -77,7 +76,6 @@ function create_site(countryCode, name; aws_config::AbstractAWSConfig=global_aws
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function create_site(
     countryCode,
     name,
@@ -122,8 +120,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"position"`:
 - `"vendorProperties"`:
 """
-function create_worker(fleet, name; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
+create_worker(fleet, name; aws_config::AbstractAWSConfig=global_aws_config()) =
+    iot_roborunner(
         "POST",
         "/createWorker",
         Dict{String,Any}(
@@ -132,7 +130,6 @@ function create_worker(fleet, name; aws_config::AbstractAWSConfig=global_aws_con
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function create_worker(
     fleet,
     name,
@@ -171,15 +168,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"additionalFixedProperties"`:
 - `"clientToken"`:
 """
-function create_worker_fleet(name, site; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
+create_worker_fleet(name, site; aws_config::AbstractAWSConfig=global_aws_config()) =
+    iot_roborunner(
         "POST",
         "/createWorkerFleet",
         Dict{String,Any}("name" => name, "site" => site, "clientToken" => string(uuid4()));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function create_worker_fleet(
     name,
     site,
@@ -213,15 +209,13 @@ Grants permission to delete a destination
 - `id`:
 
 """
-function delete_destination(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/deleteDestination",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+delete_destination(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/deleteDestination",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function delete_destination(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -244,15 +238,13 @@ Grants permission to delete a site
 - `id`:
 
 """
-function delete_site(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/deleteSite",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+delete_site(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/deleteSite",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function delete_site(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -275,15 +267,13 @@ Grants permission to delete a worker
 - `id`:
 
 """
-function delete_worker(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/deleteWorker",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+delete_worker(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/deleteWorker",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function delete_worker(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -306,15 +296,13 @@ Grants permission to delete a worker fleet
 - `id`:
 
 """
-function delete_worker_fleet(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/deleteWorkerFleet",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+delete_worker_fleet(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/deleteWorkerFleet",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function delete_worker_fleet(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -337,15 +325,13 @@ Grants permission to get a destination
 - `id`:
 
 """
-function get_destination(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET",
-        "/getDestination",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+get_destination(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET",
+    "/getDestination",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function get_destination(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -368,15 +354,13 @@ Grants permission to get a site
 - `id`:
 
 """
-function get_site(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET",
-        "/getSite",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+get_site(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET",
+    "/getSite",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function get_site(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -399,15 +383,13 @@ Grants permission to get a worker
 - `id`:
 
 """
-function get_worker(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET",
-        "/getWorker",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+get_worker(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET",
+    "/getWorker",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function get_worker(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -430,15 +412,13 @@ Grants permission to get a worker fleet
 - `id`:
 
 """
-function get_worker_fleet(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET",
-        "/getWorkerFleet",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+get_worker_fleet(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET",
+    "/getWorkerFleet",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function get_worker_fleet(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -466,15 +446,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"nextToken"`:
 - `"state"`:
 """
-function list_destinations(site; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET",
-        "/listDestinations",
-        Dict{String,Any}("site" => site);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+list_destinations(site; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET",
+    "/listDestinations",
+    Dict{String,Any}("site" => site);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function list_destinations(
     site, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -498,11 +476,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`:
 - `"nextToken"`:
 """
-function list_sites(; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET", "/listSites"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
-    )
-end
+list_sites(; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET", "/listSites"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+)
 function list_sites(
     params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -525,15 +501,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`:
 - `"nextToken"`:
 """
-function list_worker_fleets(site; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
+list_worker_fleets(site; aws_config::AbstractAWSConfig=global_aws_config()) =
+    iot_roborunner(
         "GET",
         "/listWorkerFleets",
         Dict{String,Any}("site" => site);
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function list_worker_fleets(
     site, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -561,15 +536,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`:
 - `"nextToken"`:
 """
-function list_workers(site; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "GET",
-        "/listWorkers",
-        Dict{String,Any}("site" => site);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+list_workers(site; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "GET",
+    "/listWorkers",
+    Dict{String,Any}("site" => site);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function list_workers(
     site, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -597,15 +570,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"name"`:
 - `"state"`:
 """
-function update_destination(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/updateDestination",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+update_destination(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/updateDestination",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function update_destination(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -633,15 +604,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"description"`:
 - `"name"`:
 """
-function update_site(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/updateSite",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+update_site(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/updateSite",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function update_site(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -672,15 +641,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"position"`:
 - `"vendorProperties"`:
 """
-function update_worker(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/updateWorker",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+update_worker(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/updateWorker",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function update_worker(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -707,15 +674,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"additionalFixedProperties"`:
 - `"name"`:
 """
-function update_worker_fleet(id; aws_config::AbstractAWSConfig=global_aws_config())
-    return iot_roborunner(
-        "POST",
-        "/updateWorkerFleet",
-        Dict{String,Any}("id" => id);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+update_worker_fleet(id; aws_config::AbstractAWSConfig=global_aws_config()) = iot_roborunner(
+    "POST",
+    "/updateWorkerFleet",
+    Dict{String,Any}("id" => id);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function update_worker_fleet(
     id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )

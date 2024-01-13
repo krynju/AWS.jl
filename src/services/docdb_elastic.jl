@@ -46,7 +46,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"vpcSecurityGroupIds"`: A list of EC2 VPC security groups to associate with the new
   Elastic DocumentDB cluster.
 """
-function create_cluster(
+create_cluster(
     adminUserName,
     adminUserPassword,
     authType,
@@ -54,23 +54,21 @@ function create_cluster(
     shardCapacity,
     shardCount;
     aws_config::AbstractAWSConfig=global_aws_config(),
+) = docdb_elastic(
+    "POST",
+    "/cluster",
+    Dict{String,Any}(
+        "adminUserName" => adminUserName,
+        "adminUserPassword" => adminUserPassword,
+        "authType" => authType,
+        "clusterName" => clusterName,
+        "shardCapacity" => shardCapacity,
+        "shardCount" => shardCount,
+        "clientToken" => string(uuid4()),
+    );
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return docdb_elastic(
-        "POST",
-        "/cluster",
-        Dict{String,Any}(
-            "adminUserName" => adminUserName,
-            "adminUserPassword" => adminUserPassword,
-            "authType" => authType,
-            "clusterName" => clusterName,
-            "shardCapacity" => shardCapacity,
-            "shardCount" => shardCount,
-            "clientToken" => string(uuid4()),
-        );
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function create_cluster(
     adminUserName,
     adminUserPassword,
@@ -119,17 +117,15 @@ Creates a snapshot of a cluster.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"tags"`: The tags to be assigned to the new Elastic DocumentDB snapshot.
 """
-function create_cluster_snapshot(
+create_cluster_snapshot(
     clusterArn, snapshotName; aws_config::AbstractAWSConfig=global_aws_config()
+) = docdb_elastic(
+    "POST",
+    "/cluster-snapshot",
+    Dict{String,Any}("clusterArn" => clusterArn, "snapshotName" => snapshotName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return docdb_elastic(
-        "POST",
-        "/cluster-snapshot",
-        Dict{String,Any}("clusterArn" => clusterArn, "snapshotName" => snapshotName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function create_cluster_snapshot(
     clusterArn,
     snapshotName,
@@ -163,14 +159,13 @@ Delete a Elastic DocumentDB cluster.
 - `cluster_arn`: The arn of the Elastic DocumentDB cluster that is to be deleted.
 
 """
-function delete_cluster(clusterArn; aws_config::AbstractAWSConfig=global_aws_config())
-    return docdb_elastic(
+delete_cluster(clusterArn; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "DELETE",
         "/cluster/$(clusterArn)";
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function delete_cluster(
     clusterArn,
     params::AbstractDict{String};
@@ -195,16 +190,13 @@ Delete a Elastic DocumentDB snapshot.
 - `snapshot_arn`: The arn of the Elastic DocumentDB snapshot that is to be deleted.
 
 """
-function delete_cluster_snapshot(
-    snapshotArn; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return docdb_elastic(
+delete_cluster_snapshot(snapshotArn; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "DELETE",
         "/cluster-snapshot/$(snapshotArn)";
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function delete_cluster_snapshot(
     snapshotArn,
     params::AbstractDict{String};
@@ -229,14 +221,12 @@ Returns information about a specific Elastic DocumentDB cluster.
 - `cluster_arn`: The arn of the Elastic DocumentDB cluster.
 
 """
-function get_cluster(clusterArn; aws_config::AbstractAWSConfig=global_aws_config())
-    return docdb_elastic(
-        "GET",
-        "/cluster/$(clusterArn)";
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
+get_cluster(clusterArn; aws_config::AbstractAWSConfig=global_aws_config()) = docdb_elastic(
+    "GET",
+    "/cluster/$(clusterArn)";
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
+)
 function get_cluster(
     clusterArn,
     params::AbstractDict{String};
@@ -261,16 +251,13 @@ Returns information about a specific Elastic DocumentDB snapshot
 - `snapshot_arn`: The arn of the Elastic DocumentDB snapshot.
 
 """
-function get_cluster_snapshot(
-    snapshotArn; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return docdb_elastic(
+get_cluster_snapshot(snapshotArn; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "GET",
         "/cluster-snapshot/$(snapshotArn)";
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function get_cluster_snapshot(
     snapshotArn,
     params::AbstractDict{String};
@@ -297,11 +284,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`: The maximum number of entries to recieve in the response.
 - `"nextToken"`: The nextToken which is used the get the next page of data.
 """
-function list_cluster_snapshots(; aws_config::AbstractAWSConfig=global_aws_config())
-    return docdb_elastic(
-        "GET", "/cluster-snapshots"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
-    )
-end
+list_cluster_snapshots(; aws_config::AbstractAWSConfig=global_aws_config()) = docdb_elastic(
+    "GET", "/cluster-snapshots"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+)
 function list_cluster_snapshots(
     params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -325,11 +310,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`: The maximum number of entries to recieve in the response.
 - `"nextToken"`: The nextToken which is used the get the next page of data.
 """
-function list_clusters(; aws_config::AbstractAWSConfig=global_aws_config())
-    return docdb_elastic(
-        "GET", "/clusters"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
-    )
-end
+list_clusters(; aws_config::AbstractAWSConfig=global_aws_config()) = docdb_elastic(
+    "GET", "/clusters"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+)
 function list_clusters(
     params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -348,16 +331,13 @@ Lists all tags on a Elastic DocumentDB resource
 - `resource_arn`: The arn of the Elastic DocumentDB resource.
 
 """
-function list_tags_for_resource(
-    resourceArn; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return docdb_elastic(
+list_tags_for_resource(resourceArn; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "GET",
         "/tags/$(resourceArn)";
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function list_tags_for_resource(
     resourceArn,
     params::AbstractDict{String};
@@ -398,17 +378,15 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"vpcSecurityGroupIds"`: A list of EC2 VPC security groups to associate with the Elastic
   DocumentDB cluster.
 """
-function restore_cluster_from_snapshot(
+restore_cluster_from_snapshot(
     clusterName, snapshotArn; aws_config::AbstractAWSConfig=global_aws_config()
+) = docdb_elastic(
+    "POST",
+    "/cluster-snapshot/$(snapshotArn)/restore",
+    Dict{String,Any}("clusterName" => clusterName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return docdb_elastic(
-        "POST",
-        "/cluster-snapshot/$(snapshotArn)/restore",
-        Dict{String,Any}("clusterName" => clusterName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function restore_cluster_from_snapshot(
     clusterName,
     snapshotArn,
@@ -437,15 +415,14 @@ Adds metadata tags to a Elastic DocumentDB resource
 - `tags`: The tags to be assigned to the Elastic DocumentDB resource.
 
 """
-function tag_resource(resourceArn, tags; aws_config::AbstractAWSConfig=global_aws_config())
-    return docdb_elastic(
+tag_resource(resourceArn, tags; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "POST",
         "/tags/$(resourceArn)",
         Dict{String,Any}("tags" => tags);
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function tag_resource(
     resourceArn,
     tags,
@@ -472,17 +449,14 @@ Removes metadata tags to a Elastic DocumentDB resource
 - `tag_keys`: The tag keys to be removed from the Elastic DocumentDB resource.
 
 """
-function untag_resource(
-    resourceArn, tagKeys; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return docdb_elastic(
+untag_resource(resourceArn, tagKeys; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "DELETE",
         "/tags/$(resourceArn)",
         Dict{String,Any}("tagKeys" => tagKeys);
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function untag_resource(
     resourceArn,
     tagKeys,
@@ -526,15 +500,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"vpcSecurityGroupIds"`: A list of EC2 VPC security groups to associate with the new
   Elastic DocumentDB cluster.
 """
-function update_cluster(clusterArn; aws_config::AbstractAWSConfig=global_aws_config())
-    return docdb_elastic(
+update_cluster(clusterArn; aws_config::AbstractAWSConfig=global_aws_config()) =
+    docdb_elastic(
         "PUT",
         "/cluster/$(clusterArn)",
         Dict{String,Any}("clientToken" => string(uuid4()));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function update_cluster(
     clusterArn,
     params::AbstractDict{String};

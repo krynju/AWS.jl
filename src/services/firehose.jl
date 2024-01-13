@@ -25,9 +25,12 @@ Amazon Resource Name (ARN) and role ARN in the KinesisStreamSourceConfiguration 
 To create a delivery stream with server-side encryption (SSE) enabled, include
 DeliveryStreamEncryptionConfigurationInput in your request. This is optional. You can also
 invoke StartDeliveryStreamEncryption to turn on SSE for an existing delivery stream that
-doesn't have SSE enabled. A delivery stream is configured with a single destination: Amazon
-S3, Amazon ES, Amazon Redshift, or Splunk. You must specify only one of the following
-destination configuration parameters: ExtendedS3DestinationConfiguration,
+doesn't have SSE enabled. A delivery stream is configured with a single destination, such
+as Amazon Simple Storage Service (Amazon S3), Amazon Redshift, Amazon OpenSearch Service,
+Amazon OpenSearch Serverless, Splunk, and any custom HTTP endpoint or HTTP endpoints owned
+by or supported by third-party service providers, including Datadog, Dynatrace,
+LogicMonitor, MongoDB, New Relic, and Sumo Logic. You must specify only one of the
+following destination configuration parameters: ExtendedS3DestinationConfiguration,
 S3DestinationConfiguration, ElasticsearchDestinationConfiguration,
 RedshiftDestinationConfiguration, or SplunkDestinationConfiguration. When you specify
 S3DestinationConfiguration, you can also provide the following optional values:
@@ -79,6 +82,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"KinesisStreamSourceConfiguration"`: When a Kinesis data stream is used as the source
   for the delivery stream, a KinesisStreamSourceConfiguration containing the Kinesis data
   stream Amazon Resource Name (ARN) and the role ARN for the source stream.
+- `"MSKSourceConfiguration"`:
 - `"RedshiftDestinationConfiguration"`: The destination in Amazon Redshift. You can specify
   only one destination.
 - `"S3DestinationConfiguration"`: [Deprecated] The destination in Amazon S3. You can
@@ -92,16 +96,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Tags in the Amazon Web Services Billing and Cost Management User Guide. You can specify up
   to 50 tags when creating a delivery stream.
 """
-function create_delivery_stream(
+create_delivery_stream(
     DeliveryStreamName; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "CreateDeliveryStream",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "CreateDeliveryStream",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function create_delivery_stream(
     DeliveryStreamName,
     params::AbstractDict{String};
@@ -145,16 +147,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   grant happens due to an Amazon Web Services KMS issue, Kinesis Data Firehose keeps retrying
   the delete operation. The default value is false.
 """
-function delete_delivery_stream(
+delete_delivery_stream(
     DeliveryStreamName; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "DeleteDeliveryStream",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "DeleteDeliveryStream",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function delete_delivery_stream(
     DeliveryStreamName,
     params::AbstractDict{String};
@@ -194,16 +194,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"Limit"`: The limit on the number of destinations to return. You can have one
   destination per delivery stream.
 """
-function describe_delivery_stream(
+describe_delivery_stream(
     DeliveryStreamName; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "DescribeDeliveryStream",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "DescribeDeliveryStream",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function describe_delivery_stream(
     DeliveryStreamName,
     params::AbstractDict{String};
@@ -245,11 +243,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   immediately after the name you specify in ExclusiveStartDeliveryStreamName.
 - `"Limit"`: The maximum number of delivery streams to list. The default value is 10.
 """
-function list_delivery_streams(; aws_config::AbstractAWSConfig=global_aws_config())
-    return firehose(
-        "ListDeliveryStreams"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
-    )
-end
+list_delivery_streams(; aws_config::AbstractAWSConfig=global_aws_config()) =
+    firehose("ListDeliveryStreams"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET)
 function list_delivery_streams(
     params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
@@ -280,16 +275,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   tags associated with the delivery stream, HasMoreTags is set to true in the response. To
   list additional tags, set ExclusiveStartTagKey to the last key in the response.
 """
-function list_tags_for_delivery_stream(
+list_tags_for_delivery_stream(
     DeliveryStreamName; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "ListTagsForDeliveryStream",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "ListTagsForDeliveryStream",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function list_tags_for_delivery_stream(
     DeliveryStreamName,
     params::AbstractDict{String};
@@ -317,39 +310,43 @@ operations are referred to as producers. By default, each delivery stream can ta
 2,000 transactions per second, 5,000 records per second, or 5 MB per second. If you use
 PutRecord and PutRecordBatch, the limits are an aggregate across these two operations for
 each delivery stream. For more information about limits and how to request an increase, see
-Amazon Kinesis Data Firehose Limits.  You must specify the name of the delivery stream and
-the data record when using PutRecord. The data record consists of a data blob that can be
-up to 1,000 KiB in size, and any kind of data. For example, it can be a segment from a log
-file, geographic location data, website clickstream data, and so on. Kinesis Data Firehose
+Amazon Kinesis Data Firehose Limits.  Kinesis Data Firehose accumulates and publishes a
+particular metric for a customer account in one minute intervals. It is possible that the
+bursts of incoming bytes/records ingested to a delivery stream last only for a few seconds.
+Due to this, the actual spikes in the traffic might not be fully visible in the customer's
+1 minute CloudWatch metrics. You must specify the name of the delivery stream and the data
+record when using PutRecord. The data record consists of a data blob that can be up to
+1,000 KiB in size, and any kind of data. For example, it can be a segment from a log file,
+geographic location data, website clickstream data, and so on. Kinesis Data Firehose
 buffers records before delivering them to the destination. To disambiguate the data blobs
 at the destination, a common solution is to use delimiters in the data, such as a newline
 (n) or some other character unique within the data. This allows the consumer application to
 parse individual data items when reading the data from the destination. The PutRecord
 operation returns a RecordId, which is a unique string assigned to each record. Producer
 applications can use this ID for purposes such as auditability and investigation. If the
-PutRecord operation throws a ServiceUnavailableException, back off and retry. If the
-exception persists, it is possible that the throughput limits have been exceeded for the
-delivery stream.  Data records sent to Kinesis Data Firehose are stored for 24 hours from
-the time they are added to a delivery stream as it tries to send the records to the
-destination. If the destination is unreachable for more than 24 hours, the data is no
-longer available.  Don't concatenate two or more base64 strings to form the data fields of
-your records. Instead, concatenate the raw data, then perform base64 encoding.
+PutRecord operation throws a ServiceUnavailableException, the API is automatically
+reinvoked (retried) 3 times. If the exception persists, it is possible that the throughput
+limits have been exceeded for the delivery stream.  Re-invoking the Put API operations (for
+example, PutRecord and PutRecordBatch) can result in data duplicates. For larger data
+assets, allow for a longer time out before retrying Put API operations. Data records sent
+to Kinesis Data Firehose are stored for 24 hours from the time they are added to a delivery
+stream as it tries to send the records to the destination. If the destination is
+unreachable for more than 24 hours, the data is no longer available.  Don't concatenate two
+or more base64 strings to form the data fields of your records. Instead, concatenate the
+raw data, then perform base64 encoding.
 
 # Arguments
 - `delivery_stream_name`: The name of the delivery stream.
 - `record`: The record.
 
 """
-function put_record(
-    DeliveryStreamName, Record; aws_config::AbstractAWSConfig=global_aws_config()
-)
-    return firehose(
+put_record(DeliveryStreamName, Record; aws_config::AbstractAWSConfig=global_aws_config()) =
+    firehose(
         "PutRecord",
         Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "Record" => Record);
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
-end
 function put_record(
     DeliveryStreamName,
     Record,
@@ -379,7 +376,11 @@ end
 Writes multiple data records into a delivery stream in a single call, which can achieve
 higher throughput per producer than when writing single records. To write single data
 records into a delivery stream, use PutRecord. Applications using these operations are
-referred to as producers. For information about service quota, see Amazon Kinesis Data
+referred to as producers. Kinesis Data Firehose accumulates and publishes a particular
+metric for a customer account in one minute intervals. It is possible that the bursts of
+incoming bytes/records ingested to a delivery stream last only for a few seconds. Due to
+this, the actual spikes in the traffic might not be fully visible in the customer's 1
+minute CloudWatch metrics. For information about service quota, see Amazon Kinesis Data
 Firehose Quota. Each PutRecordBatch request supports up to 500 records. Each record in the
 request can be as large as 1,000 KB (before base64 encoding), up to a limit of 4 MB for the
 entire request. These limits cannot be changed. You must specify the name of the delivery
@@ -408,30 +409,30 @@ server error or a timeout, the write might have completed or it might have faile
 FailedPutCount is greater than 0, retry the request, resending only those records that
 might have failed processing. This minimizes the possible duplicate records and also
 reduces the total bytes sent (and corresponding charges). We recommend that you handle any
-duplicates at the destination. If PutRecordBatch throws ServiceUnavailableException, back
-off and retry. If the exception persists, it is possible that the throughput limits have
-been exceeded for the delivery stream. Data records sent to Kinesis Data Firehose are
-stored for 24 hours from the time they are added to a delivery stream as it attempts to
-send the records to the destination. If the destination is unreachable for more than 24
-hours, the data is no longer available.  Don't concatenate two or more base64 strings to
-form the data fields of your records. Instead, concatenate the raw data, then perform
-base64 encoding.
+duplicates at the destination. If PutRecordBatch throws ServiceUnavailableException, the
+API is automatically reinvoked (retried) 3 times. If the exception persists, it is possible
+that the throughput limits have been exceeded for the delivery stream. Re-invoking the Put
+API operations (for example, PutRecord and PutRecordBatch) can result in data duplicates.
+For larger data assets, allow for a longer time out before retrying Put API operations.
+Data records sent to Kinesis Data Firehose are stored for 24 hours from the time they are
+added to a delivery stream as it attempts to send the records to the destination. If the
+destination is unreachable for more than 24 hours, the data is no longer available.  Don't
+concatenate two or more base64 strings to form the data fields of your records. Instead,
+concatenate the raw data, then perform base64 encoding.
 
 # Arguments
 - `delivery_stream_name`: The name of the delivery stream.
 - `records`: One or more records.
 
 """
-function put_record_batch(
+put_record_batch(
     DeliveryStreamName, Records; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "PutRecordBatch",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "Records" => Records);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "PutRecordBatch",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "Records" => Records);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function put_record_batch(
     DeliveryStreamName,
     Records,
@@ -474,18 +475,20 @@ change the ARN of the CMK or both its type and ARN. If you invoke this method to
 CMK, and the old CMK is of type CUSTOMER_MANAGED_CMK, Kinesis Data Firehose schedules the
 grant it had on the old CMK for retirement. If the new CMK is of type CUSTOMER_MANAGED_CMK,
 Kinesis Data Firehose creates a grant that enables it to use the new CMK to encrypt and
-decrypt data and to manage the grant. If a delivery stream already has encryption enabled
-and then you invoke this operation to change the ARN of the CMK or both its type and ARN
-and you get ENABLING_FAILED, this only means that the attempt to change the CMK failed. In
-this case, encryption remains enabled with the old CMK. If the encryption status of your
-delivery stream is ENABLING_FAILED, you can invoke this operation again with a valid CMK.
-The CMK must be enabled and the key policy mustn't explicitly deny the permission for
-Kinesis Data Firehose to invoke KMS encrypt and decrypt operations. You can enable SSE for
-a delivery stream only if it's a delivery stream that uses DirectPut as its source.  The
-StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations have a combined
-limit of 25 calls per delivery stream per 24 hours. For example, you reach the limit if you
-call StartDeliveryStreamEncryption 13 times and StopDeliveryStreamEncryption 12 times for
-the same delivery stream in a 24-hour period.
+decrypt data and to manage the grant. For the KMS grant creation to be successful, Kinesis
+Data Firehose APIs StartDeliveryStreamEncryption and CreateDeliveryStream should not be
+called with session credentials that are more than 6 hours old. If a delivery stream
+already has encryption enabled and then you invoke this operation to change the ARN of the
+CMK or both its type and ARN and you get ENABLING_FAILED, this only means that the attempt
+to change the CMK failed. In this case, encryption remains enabled with the old CMK. If the
+encryption status of your delivery stream is ENABLING_FAILED, you can invoke this operation
+again with a valid CMK. The CMK must be enabled and the key policy mustn't explicitly deny
+the permission for Kinesis Data Firehose to invoke KMS encrypt and decrypt operations. You
+can enable SSE for a delivery stream only if it's a delivery stream that uses DirectPut as
+its source.  The StartDeliveryStreamEncryption and StopDeliveryStreamEncryption operations
+have a combined limit of 25 calls per delivery stream per 24 hours. For example, you reach
+the limit if you call StartDeliveryStreamEncryption 13 times and
+StopDeliveryStreamEncryption 12 times for the same delivery stream in a 24-hour period.
 
 # Arguments
 - `delivery_stream_name`: The name of the delivery stream for which you want to enable
@@ -496,16 +499,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"DeliveryStreamEncryptionConfigurationInput"`: Used to specify the type and Amazon
   Resource Name (ARN) of the KMS key needed for Server-Side Encryption (SSE).
 """
-function start_delivery_stream_encryption(
+start_delivery_stream_encryption(
     DeliveryStreamName; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "StartDeliveryStreamEncryption",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "StartDeliveryStreamEncryption",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function start_delivery_stream_encryption(
     DeliveryStreamName,
     params::AbstractDict{String};
@@ -549,16 +550,14 @@ same delivery stream in a 24-hour period.
   server-side encryption (SSE).
 
 """
-function stop_delivery_stream_encryption(
+stop_delivery_stream_encryption(
     DeliveryStreamName; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "StopDeliveryStreamEncryption",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "StopDeliveryStreamEncryption",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function stop_delivery_stream_encryption(
     DeliveryStreamName,
     params::AbstractDict{String};
@@ -594,16 +593,14 @@ five transactions per second per account.
 - `tags`: A set of key-value pairs to use to create the tags.
 
 """
-function tag_delivery_stream(
+tag_delivery_stream(
     DeliveryStreamName, Tags; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "TagDeliveryStream",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "Tags" => Tags);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "TagDeliveryStream",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "Tags" => Tags);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function tag_delivery_stream(
     DeliveryStreamName,
     Tags,
@@ -641,16 +638,14 @@ per account.
   stream.
 
 """
-function untag_delivery_stream(
+untag_delivery_stream(
     DeliveryStreamName, TagKeys; aws_config::AbstractAWSConfig=global_aws_config()
+) = firehose(
+    "UntagDeliveryStream",
+    Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "TagKeys" => TagKeys);
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "UntagDeliveryStream",
-        Dict{String,Any}("DeliveryStreamName" => DeliveryStreamName, "TagKeys" => TagKeys);
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function untag_delivery_stream(
     DeliveryStreamName,
     TagKeys,
@@ -683,21 +678,22 @@ Redshift) or change the parameters associated with a destination (for example, t
 the bucket name of the Amazon S3 destination). The update might not occur immediately. The
 target delivery stream remains active while the configurations are updated, so data writes
 to the delivery stream can continue during this process. The updated configurations are
-usually effective within a few minutes. Switching between Amazon ES and other services is
-not supported. For an Amazon ES destination, you can only update to another Amazon ES
-destination. If the destination type is the same, Kinesis Data Firehose merges the
-configuration parameters specified with the destination configuration that already exists
-on the delivery stream. If any of the parameters are not specified in the call, the
-existing values are retained. For example, in the Amazon S3 destination, if
-EncryptionConfiguration is not specified, then the existing EncryptionConfiguration is
-maintained on the destination. If the destination type is not the same, for example,
-changing the destination from Amazon S3 to Amazon Redshift, Kinesis Data Firehose does not
-merge any parameters. In this case, all parameters must be specified. Kinesis Data Firehose
-uses CurrentDeliveryStreamVersionId to avoid race conditions and conflicting merges. This
-is a required field, and the service updates the configuration only if the existing
-configuration has a version ID that matches. After the update is applied successfully, the
-version ID is updated, and can be retrieved using DescribeDeliveryStream. Use the new
-version ID to set CurrentDeliveryStreamVersionId in the next call.
+usually effective within a few minutes. Switching between Amazon OpenSearch Service and
+other services is not supported. For an Amazon OpenSearch Service destination, you can only
+update to another Amazon OpenSearch Service destination. If the destination type is the
+same, Kinesis Data Firehose merges the configuration parameters specified with the
+destination configuration that already exists on the delivery stream. If any of the
+parameters are not specified in the call, the existing values are retained. For example, in
+the Amazon S3 destination, if EncryptionConfiguration is not specified, then the existing
+EncryptionConfiguration is maintained on the destination. If the destination type is not
+the same, for example, changing the destination from Amazon S3 to Amazon Redshift, Kinesis
+Data Firehose does not merge any parameters. In this case, all parameters must be
+specified. Kinesis Data Firehose uses CurrentDeliveryStreamVersionId to avoid race
+conditions and conflicting merges. This is a required field, and the service updates the
+configuration only if the existing configuration has a version ID that matches. After the
+update is applied successfully, the version ID is updated, and can be retrieved using
+DescribeDeliveryStream. Use the new version ID to set CurrentDeliveryStreamVersionId in the
+next call.
 
 # Arguments
 - `current_delivery_stream_version_id`: Obtain this value from the VersionId result of
@@ -723,23 +719,21 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"S3DestinationUpdate"`: [Deprecated] Describes an update for a destination in Amazon S3.
 - `"SplunkDestinationUpdate"`: Describes an update for a destination in Splunk.
 """
-function update_destination(
+update_destination(
     CurrentDeliveryStreamVersionId,
     DeliveryStreamName,
     DestinationId;
     aws_config::AbstractAWSConfig=global_aws_config(),
+) = firehose(
+    "UpdateDestination",
+    Dict{String,Any}(
+        "CurrentDeliveryStreamVersionId" => CurrentDeliveryStreamVersionId,
+        "DeliveryStreamName" => DeliveryStreamName,
+        "DestinationId" => DestinationId,
+    );
+    aws_config=aws_config,
+    feature_set=SERVICE_FEATURE_SET,
 )
-    return firehose(
-        "UpdateDestination",
-        Dict{String,Any}(
-            "CurrentDeliveryStreamVersionId" => CurrentDeliveryStreamVersionId,
-            "DeliveryStreamName" => DeliveryStreamName,
-            "DestinationId" => DestinationId,
-        );
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function update_destination(
     CurrentDeliveryStreamVersionId,
     DeliveryStreamName,
