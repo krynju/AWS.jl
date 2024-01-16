@@ -228,6 +228,7 @@ function ec2_instance_metadata(path::AbstractString)
     request = try
         @mock HTTP.request("GET", uri; connect_timeout=1)
     catch e
+        @error("IMDS.get error", exception=(e, catch_backtrace()))
         if e isa HTTP.ConnectError
             nothing
         else
