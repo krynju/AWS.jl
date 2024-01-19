@@ -226,7 +226,7 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
 function ec2_instance_metadata(path::AbstractString)
     uri = HTTP.URI(; scheme="http", host="169.254.169.254", path=path)
     request = try
-        @mock HTTP.request("GET", uri; connect_timeout=20)
+        @mock HTTP.request("GET", uri)
     catch e
         @error("IMDS.get error", exception=(e, catch_backtrace()))
         @info read(pipeline(`bash -c "time curl --connect-timeout 30 $(string(uri))"`), String) "IMDS.get curl attempt"
