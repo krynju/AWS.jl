@@ -228,7 +228,7 @@ function ec2_instance_metadata(path::AbstractString)
     uri = HTTP.URI(; scheme="http", host="169.254.169.254", path=path)
     request = try
         io = IOBuffer()
-        r = Downloads.request(string(url); method="GET", output=io, throw=true, timeout=30)
+        r = Downloads.request(string(uri); method="GET", output=io, throw=true, timeout=30)
         if r isa Downloads.Response && r.status == 200
             String(take!(io))
         else
