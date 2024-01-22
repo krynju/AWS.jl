@@ -3,6 +3,7 @@ using HTTP
 using IniFile
 using JSON
 using Mocking
+using Downloads: Downloads
 
 using ..AWSExceptions
 
@@ -212,6 +213,7 @@ function check_credentials(aws_creds::AWSCredentials; force_refresh::Bool=false)
 end
 check_credentials(aws_creds::Nothing) = aws_creds
 
+const CURLE_OPERATION_TIMEDOUT = 28
 """
     ec2_instance_metadata(path::AbstractString) -> Union{String, Nothing}
 
@@ -226,16 +228,24 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
 function ec2_instance_metadata(path::AbstractString)
     uri = HTTP.URI(; scheme="http", host="169.254.169.254", path=path)
     request = try
-        @mock HTTP.request("GET", uri; connect_timeout=1)
+        io = IOBuffer()
+        r = Downloads.request(string(uri); method="GET", output=io, throw=true, timeout=5)
+        if r isa Downloads.Response && r.status == 200
+            String(take!(io))
+        else
+            @error("IMDS.get error: non-200", response=r)
+            nothing
+        end
     catch e
-        if e isa HTTP.ConnectError
+        @error("IMDS.get error", exception=(e, catch_backtrace()))
+        if e isa Downloads.RequestError && e.code == CURLE_OPERATION_TIMEDOUT
             nothing
         else
             rethrow()
         end
     end
 
-    return request !== nothing ? String(request.body) : nothing
+    return request !== nothing ? request : nothing
 end
 
 """
